@@ -16,7 +16,7 @@ class DrawingWidget(Widget):
         self.path_points = []
         self.bot = None
         self.bot_index = 0
-        self.bot_speed = 2
+        self.bot_speed = 3
         self.moving = False
         self.paused = False
         self.distance_label = None  
@@ -114,20 +114,34 @@ class TrackBotApp(App):
         Window.clearcolor = (0, 0, 0, 1)  
         layout = BoxLayout(orientation="vertical", padding=10, spacing=10)
 
-        self.drawing_area = DrawingWidget(size_hint=(1, 0.85))  
-        toolbar = GridLayout(cols=5, size_hint=(1, 0.07), spacing=10)
-        button_size = (0.19, 1)  
+        self.drawing_area = DrawingWidget(size_hint=(1, 0.75))  
+
+        control_layout = BoxLayout(size_hint=(1, 0.25), orientation="vertical", spacing=10, padding=(10, 5))
+
+        # Speed Slider
+        speed_layout = BoxLayout(size_hint=(1, None), height=50, spacing=10)
+        speed_label = Label(text="Speed:", size_hint=(None, None), size=(80, 50), color=(1, 1, 1, 1))
+        speed_slider = Slider(min=1, max=10, value=3, size_hint=(1, None), height=50)
+        speed_slider.bind(value=self.drawing_area.update_speed)
+        speed_layout.add_widget(speed_label)
+        speed_layout.add_widget(speed_slider)
+
+        # Distance Label
+        distance_layout = BoxLayout(size_hint=(1, None), height=40)
+        self.drawing_area.distance_label = Label(
+            text="Distance: 0.00 cm = 0.00 m",
+            color=(1, 1, 1, 1)
+        )
+        distance_layout.add_widget(self.drawing_area.distance_label)
+
+        # Toolbar (Buttons)
+        toolbar = GridLayout(cols=4, size_hint=(1, None), height=50, spacing=10)
+        button_size = (1, 1)  
 
         clear_button = Button(text="Clear", size_hint=button_size, background_color=(0.8, 0.2, 0.2, 1))
         send_button = Button(text="Create", size_hint=button_size, background_color=(0.2, 0.9, 0.2, 1))
         start_button = Button(text="Start", size_hint=button_size, background_color=(1, 0.8, 0.0, 1))
         pause_button = Button(text="P/R", size_hint=button_size, background_color=(0.6, 0.3, 1, 1))
-        
-        self.drawing_area.distance_label = Label(
-            text="Distance: 0.00 cm = 0.00 m",
-            size_hint=button_size,
-            color=(1, 1, 1, 1)
-        )
 
         clear_button.bind(on_press=self.drawing_area.clear_canvas)
         send_button.bind(on_press=self.drawing_area.create_bot)
@@ -138,19 +152,14 @@ class TrackBotApp(App):
         toolbar.add_widget(send_button)
         toolbar.add_widget(start_button)
         toolbar.add_widget(pause_button)
-        toolbar.add_widget(self.drawing_area.distance_label)  
 
-        speed_layout = BoxLayout(size_hint=(1, 0.08), spacing=10)
-        speed_label = Label(text="Speed:", size_hint=(None, None), size=(80, 40), color=(1, 1, 1, 1))
-        speed_slider = Slider(min=1, max=10, value=3, size_hint=(1, None), height=40)
-        speed_slider.bind(value=self.drawing_area.update_speed)
-
-        speed_layout.add_widget(speed_label)
-        speed_layout.add_widget(speed_slider)
+        # Adding all sections to control layout
+        control_layout.add_widget(speed_layout)
+        control_layout.add_widget(distance_layout)
+        control_layout.add_widget(toolbar)
 
         layout.add_widget(self.drawing_area)
-        layout.add_widget(toolbar)
-        layout.add_widget(speed_layout)
+        layout.add_widget(control_layout)
 
         return layout
 
